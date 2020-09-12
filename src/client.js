@@ -15,11 +15,7 @@ class Client extends EventEmitter {
 	middleware() {
 		return new express.Router()
 			.post('/poll/:gameid', async (req, res) => {
-				return this.createSocket({
-					req,
-					res,
-					gameID: req.query.gameid
-				});
+				return this.createConnection(req.params.gameid, req, res);
 			});
 	}
 	createConnection(gameID, req, res) {
@@ -31,9 +27,20 @@ class Client extends EventEmitter {
 				gameID
 			});
 			this.connections.set(gameID, connection);
-
+			connection.on('socketAdd', (socket) => {
+				this.emit('socketAdd', socket);
+			});
+			connection.on('socketRemove', (socket) => {
+				this.emit('socketRemove', socket);
+			});
+			connection.on('readyStateChange', (socket, state) => {
+				this.emit('readyStateChange', socket, state);
+			});
+			this.emit('connectionAdd', connection);
 		}
 
-		connection.createSocket(req, res);	
+		connection.createSocket(req, res);
 	}
 }
+
+module.exports = Client;

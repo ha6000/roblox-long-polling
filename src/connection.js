@@ -11,11 +11,16 @@ class Connection extends EventEmitter {
 		this.gameID = opts.gameID;
 	}
 	createSocket(req, res) {
-		return this.sockets.push(new Socket({
+		const socket = new Socket({
 			req,
 			res,
 			gameID: this.gameID
-		}));
+		});
+		this.sockets.push(socket);
+		socket.on('readyStateChange', (state) => {
+			this.emit('readyStateChange', socket, state);
+		});
+		this.emit('socketAdd', socket);
 	}
 	send(name, data) {
 		const options = Object.assign({}, Constants._SocketMessage, {
@@ -43,6 +48,8 @@ class Connection extends EventEmitter {
 		}
 		this.sockets.splice(socketIndex, 1);
 
+		this.emit('socketRemove', socket);
+
 		try {
 			await socket.send(options);
 		}
@@ -55,3 +62,5 @@ class Connection extends EventEmitter {
 		return true;
 	}
 }
+
+module.exports = Connection;

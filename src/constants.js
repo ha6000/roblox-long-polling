@@ -10,15 +10,17 @@ module.exports.ClientOptions = ClientOptions;
 
 /**
  * @typedef {Object} SocketOptions
+ * @property {Connection} connection The connection the socket belongs to
  * @property {express.Request} req The sockets request
  * @property {express.Response} res The sockets response
  * @property {String} gameID roblox gameID of socket
  */
 
 const SocketOptions = {
+	connection: undefined,
 	req: undefined,
 	res: undefined,
-	gameID: undefined
+	gameID: undefined,
 }
 module.exports.SocketOptions = SocketOptions;
 
@@ -31,9 +33,9 @@ const SocketStates = {
 	READY: 'READY',
 	CLOSED: 'CLOSED'
 }
-module.exports = SocketStates;
+module.exports.SocketStates = SocketStates;
 
-const _SocketMessage {
+const _SocketMessage = {
 	name: undefined,
 	data: undefined
 }

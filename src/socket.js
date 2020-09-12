@@ -5,11 +5,9 @@ class GameSocket extends EventEmitter {
 	queue = [];
 	constructor(options = {}) {
 		super();
-		this.on('readyStateChange', (state) => {
-			if (state == Constants.SocketStates.READY) {
-				return this.emit('ready', this);
-			}
-		});
+		options = Object.assign({}, Constants.SocketOptions, options);
+		
+		this.connection = options.connection;
 		this.gameID = options.gameID;
 		this.req = options.req;
 		this.res = options.res;
@@ -17,7 +15,7 @@ class GameSocket extends EventEmitter {
 	}
 	setReadyState(state = Constants.SocketStates.READY) {
 		this.readyState = state;
-		return this.emit('readyStateChange', readyState);
+		return this.emit('readyStateChange', this.readyState);
 	}
 	send(opts = {}) {
 		this.setReadyState(Constants.SocketStates.CLOSED);
@@ -25,3 +23,5 @@ class GameSocket extends EventEmitter {
 		return this.res.status(200).send(opts);
 	}
 }
+
+module.exports = GameSocket;
