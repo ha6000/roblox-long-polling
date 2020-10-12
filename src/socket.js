@@ -11,14 +11,16 @@ class GameSocket extends EventEmitter {
 		this.gameID = options.gameID;
 		this.req = options.req;
 		this.res = options.res;
-		this.setReadyState(Constants.SocketStates.READY);
+		this.setState(!res.writableFinished ? Constants.SocketStates.OPEN : Constants.SocketStates.CLOSED);
 	}
-	setReadyState(state = Constants.SocketStates.READY) {
-		this.readyState = state;
-		return this.emit('readyStateChange', this.readyState);
+	setState(state = Constants.SocketStates.OPEN) {
+		this.state = state;
+		return this.emit('stateChange', this.state);
 	}
 	send(opts = {}) {
-		this.setReadyState(Constants.SocketStates.CLOSED);
+		if (this.state == Constants.SocketStates.CLOSED) throw new Error('Socket already closed');
+
+		this.setState(Constants.SocketStates.CLOSED);
 
 		return this.res.status(200).send(opts);
 	}
