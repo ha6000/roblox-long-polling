@@ -13,5 +13,6 @@
 	},
 	"metadata": {
 		"title": "roblox-long-polling-server"
-	}
+	},
+	"plugins": ["plugins/markdown"]
 }
