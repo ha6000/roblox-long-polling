@@ -1,6 +1,7 @@
 const { EventEmitter } = require('events');
 const Constants = require('./constants');
 const Socket = require('./socket');
+const Payload = require('./payload');
 
 class Connection extends EventEmitter {
 	queue = [];
@@ -22,42 +23,62 @@ class Connection extends EventEmitter {
 		});
 		this.emit('socketAdd', socket);
 	}
-	send(data, metadata = {}) {
-		const options = Object.assign({}, Constants._SocketMessage, {
-			...metadata,
-			data
+	send(payloads) {
+		return new Promise((res, rej) => {
+			if (Array.isArray(payloads)) {
+				return Promise.allSettled(this._handlePayloads());
+			}
+			else {
+				const { 0: payload } = _handlePayloads([payloads]);
+
+				return payload;
+			}
 		});
-		this.queue.push(options);
-		return this._run();
 	}
-	async _run() {
+	_handlePayloads(requests) {
+		const payloads = requests.map(p => {
+			return new Promise(res => {
+				const payload = p instanceof Payload ? p : new Payload(p);
+
+				payload.once('send', res);
+			});
+		});
+		this.queue.push(...payloads);
+		this._run();
+
+		return payloads;
+	}
+	_run() {
 		if (this.queue.length < 1) return;
-		return this._execute(this.queue.shift());
+		return this._execute();
 	}
-	async _execute(data) {
+	async _execute() {
 		const socket = this.sockets.find(s => s.state == Constants.SocketStates.OPEN);
 		if (!socket) {
-			this.queue.unshift(data);
 			return null;
 		}
 
 		const socketIndex = this.sockets.indexOf(socket);
 		if (socketIndex < 0) {
-			this.queue.unshift(data);
 			return null;
 		}
 		this.sockets.splice(socketIndex, 1);
 
 		this.emit('socketRemove', socket);
 
+		const queue = this.queue.concat();
+		this.queue = [];
+
 		try {
-			await socket.send(options);
+			await socket.send(queue.map(p => p.data));
 		}
 		catch(err) {
 			this.emit('error', err);
-			this.queue.unshift(data);
+			this.queue.unshift(...queue);
 			return false;
 		}
+
+		queue.forEach(p => p.emit('send'));
 
 		return true;
 	}

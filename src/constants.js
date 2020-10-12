@@ -38,12 +38,6 @@ const SocketStates = {
 }
 module.exports.SocketStates = SocketStates;
 
-const _SocketMessage = {
-	name: undefined,
-	data: undefined
-}
-module.exports._SocketMessage = _SocketMessage;
-
 /**
  * @typedef {Object} ConnectionOptions
  * @property {String} gameID The game id of the connection
