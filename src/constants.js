@@ -1,10 +1,12 @@
 /**
  * @typedef {Object} ClientOptions
- * @property {String} token Your api's token
+ * @property {String} [secret] Your api's secret
+ * @property {Number} [port] Port to listen on
  */
 
 const ClientOptions = {
-	token: undefined
+	port: 8080,
+	secret: undefined
 }
 module.exports.ClientOptions = ClientOptions;
 
@@ -26,12 +28,13 @@ module.exports.SocketOptions = SocketOptions;
 
 /**
  * @typedef {Object} SocketStates
- * @property {String} READY Socket is ready to recieve reply
+ * @property {Number} OPEN Socket is ready to send reply
+ * @property {Number} CLOSED Socket is closed and can not send data
  */
 
 const SocketStates = {
-	READY: 'READY',
-	CLOSED: 'CLOSED'
+	OPEN: 1,
+	CLOSED: 0
 }
 module.exports.SocketStates = SocketStates;
 
@@ -44,7 +47,6 @@ module.exports._SocketMessage = _SocketMessage;
 /**
  * @typedef {Object} ConnectionOptions
  * @property {String} gameID The game id of the connection
- * @property {Array} sockets Sockets connected
  */
 
 const ConnectionOptions = {
