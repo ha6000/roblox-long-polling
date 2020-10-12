@@ -10,32 +10,32 @@ class Connection extends EventEmitter {
 		opts = Object.assign({}, Constants.ConnectionOptions, opts);
 		this.gameID = opts.gameID;
 	}
-	createSocket(req, res) {
+	_createSocket(req, res) {
 		const socket = new Socket({
 			req,
 			res,
 			gameID: this.gameID
 		});
 		this.sockets.push(socket);
-		socket.on('readyStateChange', (state) => {
-			this.emit('readyStateChange', socket, state);
+		socket.on('stateChange', (state) => {
+			this.emit('stateChange', socket, state);
 		});
 		this.emit('socketAdd', socket);
 	}
-	send(name, data) {
+	send(data, metadata = {}) {
 		const options = Object.assign({}, Constants._SocketMessage, {
-			name,
+			...metadata,
 			data
 		});
 		this.queue.push(options);
-		return this.run();
+		return this._run();
 	}
-	async run() {
+	async _run() {
 		if (this.queue.length < 1) return;
-		return this.execute(this.queue.shift());
+		return this._execute(this.queue.shift());
 	}
-	async execute(data) {
-		const socket = this.sockets.find(s => s.readyState == Constants.SocketStates.READY);
+	async _execute(data) {
+		const socket = this.sockets.find(s => s.state == Constants.SocketStates.OPEN);
 		if (!socket) {
 			this.queue.unshift(data);
 			return null;
