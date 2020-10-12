@@ -12,13 +12,25 @@ class Client extends EventEmitter {
 		this.options = Object.assign({}, Constants, options);
 		this.connections = new Map();
 	}
-	middleware() {
+	listener() {
 		return new express.Router()
 			.post('/poll/:gameid', async (req, res) => {
 				return this.createConnection(req.params.gameid, req, res);
 			});
 	}
-	createConnection(gameID, req, res) {
+	listen(port) {
+		return new Promise(res => {
+			port = port || this.options.port;
+
+			if (!port) throw new ReferenceError('No port specified');
+
+			this.app = express();
+			this.app.use('/r', this.listener());
+
+			return this.app.listen(port, res);
+		});
+	}
+	_createConnection(gameID, req, res) {
 		if (!gameID) return;
 
 		let connection = this.connections.get(gameID);
@@ -39,7 +51,7 @@ class Client extends EventEmitter {
 			this.emit('connectionAdd', connection);
 		}
 
-		connection.createSocket(req, res);
+		connection._createSocket(req, res);
 	}
 }
 
