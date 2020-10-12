@@ -25,7 +25,7 @@ class Client extends EventEmitter {
 	listener() {
 		return new express.Router()
 			.post('/poll/:gameid', async (req, res) => {
-				return this.createConnection(req.params.gameid, req, res);
+				return this._createConnection(req.params.gameid, req, res);
 			});
 	}
 	/**
@@ -54,26 +54,58 @@ class Client extends EventEmitter {
 				gameID
 			});
 			this.connections.set(gameID, connection);
+			/**
+			 * When socket gets added
+			 * @event Client#socketAdd
+			 * @type {Socket}
+			 */
 			connection.on('socketAdd', (socket) => {
 				this.emit('socketAdd', socket);
 			});
+			/**
+			 * When socket gets removed
+			 * @event Client#socketRemove
+			 * @type {Socket}
+			 */
 			connection.on('socketRemove', (socket) => {
 				this.emit('socketRemove', socket);
 			});
-			connection.on('readyStateChange', (socket, state) => {
-				this.emit('readyStateChange', socket, state);
+			/**
+			 * When socket's state changes
+			 * @event Client#stateChange
+			 * @param {Socket}
+			 * @param {SocketStateResolvable}
+			 */
+			connection.on('stateChange', (socket, state) => {
+				this.emit('stateChange', socket, state);
 			});
+			/**
+			 * When new connection gets added
+			 * @event Client#connectionAdd
+			 * @type {Connection}
+			 */
 			this.emit('connectionAdd', connection);
 		}
 
 		connection._createSocket(req, res);
 	}
+	/**
+	 * Sends data to game with gameID
+	 * @param  {String} gameID Game to send data to
+	 * @param  {Object} data   Data to send
+	 * @return {Promise}       Promise will be resolved when data is send
+	 */
 	send(gameID, data) {
 		const connection = this.connections.get(gameID);
 		if (!connection) return new ReferenceError('No such gameID');
 
 		return connection.send(data);
 	}
+	/**
+	 * Sends data to all games
+	 * @param  {Object} data Data to send
+	 * @return {Array}      allSettled of all the requests
+	 */
 	broadcast(data) {
 		return Promise.allSettled(this.connections.values().map(connection => connection.send(payload)));
 	}

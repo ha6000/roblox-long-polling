@@ -3,9 +3,15 @@ const Constants = require('./constants');
 const Socket = require('./socket');
 const Payload = require('./payload');
 
+/**
+ * Connection to roblox
+ */
 class Connection extends EventEmitter {
 	queue = [];
 	sockets = [];
+	/**
+	 * @param  {ConnectionOptions} opts Options for the connection
+	 */
 	constructor(opts = {}) {
 		super();
 		opts = Object.assign({}, Constants.ConnectionOptions, opts);
@@ -18,11 +24,27 @@ class Connection extends EventEmitter {
 			gameID: this.gameID
 		});
 		this.sockets.push(socket);
+		/**
+		 * When sockets state changes
+		 * @event Connection#stateChange
+		 * @param {Socket}
+		 * @param {SocketStateResolvable}
+		 */
 		socket.on('stateChange', (state) => {
 			this.emit('stateChange', socket, state);
 		});
+		/**
+		 * When socket gets added to connection
+		 * @event Connection#socketAdd
+		 * @type {Socket}
+		 */
 		this.emit('socketAdd', socket);
 	}
+	/**
+	 * Sends request with one of the sockets
+	 * @param  {PayloadResolvable} payloads Data to send
+	 * @return {Array|Promise}          allSettled array or promise
+	 */
 	send(payloads) {
 		return new Promise((res, rej) => {
 			if (Array.isArray(payloads)) {
@@ -64,6 +86,11 @@ class Connection extends EventEmitter {
 		}
 		this.sockets.splice(socketIndex, 1);
 
+		/**
+		 * When socket gets removed from connection
+		 * @event Connection#socketRemove
+		 * @type {Socket}
+		 */
 		this.emit('socketRemove', socket);
 
 		const queue = this.queue.concat();

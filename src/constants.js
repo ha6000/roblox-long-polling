@@ -39,6 +39,10 @@ const SocketStates = {
 module.exports.SocketStates = SocketStates;
 
 /**
+ * @typedef {Number} SocketStateResolvable
+ */
+
+/**
  * @typedef {Object} ConnectionOptions
  * @property {String} gameID The game id of the connection
  */
@@ -46,4 +50,9 @@ module.exports.SocketStates = SocketStates;
 const ConnectionOptions = {
 	gameID: undefined
 }
+/**
+ * @typedef {Payload|Array<Payload>|Object|Array<Object>} PayloadResolvable
+ */
+
+
 module.exports.ConnectionOptions = ConnectionOptions;
