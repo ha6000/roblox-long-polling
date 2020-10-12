@@ -5,7 +5,7 @@
 		"template": "./node_modules/tidy-jsdoc"
 	},
 	"source": {
-		"include": ["src/"]
+		"include": ["src/", "README.md"]
 	},
 	"templates": {
 		"cleverLinks": true,
