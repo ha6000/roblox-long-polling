@@ -1,8 +1,17 @@
 {
 	"opts": {
-		"destination": "./docs/"
+		"lenient": true,
+		"destination": "./docs/",
+		"template": "./node_modules/tidy-jsdoc"
 	},
 	"source": {
 		"include": ["src/"]
+	},
+	"templates": {
+		"cleverLinks": true,
+		"monospaceLinks": true
+	},
+	"metadata": {
+		"title": "roblox-long-polling-server"
 	}
 }
